@@ -94,6 +94,28 @@
         </n-gi>
 
         <n-gi :span="1" style="display: flex; justify-content:right;">
+          <div class="sm-schedule-item-header" style="margin-top: 3.5px;">{{ attendeesText }}</div>
+        </n-gi>
+        <n-gi :span="3">
+          <n-space vertical>
+            <n-space v-for="(attendee, index) in attendees" :key="index">
+              <n-input v-model:value="attendee.name" type="text" :placeholder="attendeePlaceholder" size="small" style="width: 120px"/>
+              <n-button circle quaternary size="small" @click="removeAttendee(index)">
+                <template #icon>
+                  <n-icon :component="DeleteOutlined" />
+                </template>
+              </n-button>
+            </n-space>
+            <n-button quaternary size="small" @click="addAttendee">
+              <template #icon>
+                <n-icon :component="PlusOutlined" />
+              </template>
+              {{ addAttendeeText }}
+            </n-button>
+          </n-space>
+        </n-gi>
+
+        <n-gi :span="1" style="display: flex; justify-content:right;">
           <div class="sm-schedule-item-header" style="margin-top: 3.5px;">{{ scheduleContentText }}</div>
         </n-gi>
         <n-gi :span="2">
@@ -170,7 +192,7 @@
 <script>
   import { defineComponent, ref } from 'vue';
   import { i18n, globalData, smColor, setFCApi } from "../utils/utils";
-  import { DeleteOutlined, EditOutlined, CheckOutlined, ClearOutlined, ArrowRightOutlined } from '@vicons/antd'
+  import { DeleteOutlined, EditOutlined, CheckOutlined, ClearOutlined, ArrowRightOutlined, PlusOutlined } from '@vicons/antd'
   import EventAggregator from "../utils/EventAggregator";
   import * as moment from "moment";
   import { format, parseISO, getTime } from 'date-fns';
@@ -189,6 +211,7 @@ export default defineComponent({
       CheckOutlined,
       ClearOutlined,
       ArrowRightOutlined,
+      PlusOutlined,
       monthText: i18n.month,
       scheduleCategoryText: i18n.scheduleCategory,
       selectScheduleCategoryText: i18n.selectScheduleCategory,
@@ -209,6 +232,9 @@ export default defineComponent({
       onlyAllowNumberText: i18n.onlyAllowNumber,
       gregorianCalendarText: i18n.gregorianCalendar,
       lunarCalendarText: i18n.lunarCalendar,
+      attendeesText: i18n.attendees,
+      addAttendeeText: i18n.addAttendee,
+      attendeePlaceholder: i18n.attendeePlaceholder,
       selectedDate: "",
       canNewSchedule: false,
       modalClosable: false,
@@ -229,6 +255,7 @@ export default defineComponent({
       selectedWeekday: ref([]),
       selectedMonthday: ref([]),
       selectedYearday: ref([]),
+      attendees: ref([]),
       scheduleStatusList: [
         {
           value: 1,
@@ -444,6 +471,9 @@ export default defineComponent({
       
       this.selectedSchedule = new Schedule(id, '', isAllDay, isRecurringSchedule, calendarType, frequency, weekdays, monthdays, yeardays, interval, '', '', category, '', '', 1);
 
+      // 清空参会人员列表
+      this.attendees = [];
+      
       this.showEditModal = true;
       this.createRecurringDays();
     },
@@ -522,7 +552,8 @@ export default defineComponent({
         let newSchedule = new Schedule(id, this.scheduleName, this.isAllDaySchedule,
                             this.isRecurringSchedule, this.calendarTypeCheckedValue, this.selectedFreq, this.selectedWeekday, this.selectedMonthday, this.selectedYearday,
                             this.scheduleInterval, start, end,
-                            this.selectedCategory, this.scheduleContentBlockId, this.scheduleContent, this.selectedScheduleStatus
+                            this.selectedCategory, this.scheduleContentBlockId, this.scheduleContent, this.selectedScheduleStatus,
+                            this.attendees.map(a => a.name)
                            );
         if(this.selectedScheduleStatus == 3)
           newSchedule.setDoneTime(moment().valueOf());
@@ -543,7 +574,15 @@ export default defineComponent({
         if(this.scheduleContentBlockId !== null && this.scheduleContentBlockId !== undefined) {
           EventAggregator.emit('openBlockFloatLayer', this.scheduleContentBlockId);
         }
-      }
+      },
+
+      addAttendee() {
+        this.attendees.push({ name: '' });
+      },
+
+      removeAttendee(index) {
+        this.attendees.splice(index, 1);
+      },
   }
 })
 </script>

@@ -1,4 +1,3 @@
-
 export class Schedule {
     id: string;
     title: string;
@@ -17,12 +16,14 @@ export class Schedule {
     content: string;
     status: number;
     doneTime: number;
+    attendees: string[]; // 参会人员列表
 
     constructor(id?: string, title?: string, isAllDay?: boolean,
                 isRecurringSchedule?: boolean, calendarType?:string, frequency?: string,
                 weekdays?: string[], monthdays?:string[], yeardays?:string[],
                 interval?: number, start?: string, end?: string, 
-                category?: string, refBlockId?:string, content?: string, status?: number) {
+                category?: string, refBlockId?:string, content?: string, status?: number,
+                attendees?: string[]) {
         this.id = id;
         this.title = title;
         this.isAllDay = isAllDay;
@@ -40,6 +41,7 @@ export class Schedule {
         this.content = content;
         this.status = status;
         this.doneTime = 0;
+        this.attendees = attendees || [];
     }
 
     setDoneTime(doneTime?: number) {
